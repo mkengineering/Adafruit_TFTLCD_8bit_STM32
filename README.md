@@ -11,19 +11,20 @@ Contribution from users for other display control types is welcome and made easy
 
 Benchmark Using Adafruit 3.2" ILI9341 based TFT and STM32 Blue Pill @ 72 MHz:
 
-Benchmark                Time (microseconds)
-Screen fill              64319
-Text                     21731
-Lines                    183174
-Horiz/Vert Lines         7620
-Rectangles (outline)     6035
-Rectangles (filled)      149662
-Circles (filled)         70666
-Circles (outline)        79573
-Triangles (outline)      39746
-Triangles (filled)       91286
-Rounded rects (outline)  28431
-Rounded rects (filled)   166652
+| Benchmark | Time (microseconds) |
+| --- | --- |
+| `Screen fill` | 64319 |
+| `Text` | 21731 |
+| `Lines` | 183174 |
+| `Horiz/Vert Lines` | 7620 |
+| `Rectangles (outline)` | 6035 |
+| `Rectangles (filled)` | 149662 |
+| `Circles (filled)` | 70666 |
+| `Circles (outline)` | 79573 |
+| `Triangles (outline)` | 39746 |
+| `Triangles (filled)` | 91286 |
+| `Rounded rects (outline)` | 28431 |
+| `Rounded rects (filled)` | 166652 |
 
 How to use:
 - Place the Adafruit_TFT library folder your <arduinosketchfolder>/libraries/ folder. You may need to create the libraries subfolder if its your first library. Restart the IDE.
