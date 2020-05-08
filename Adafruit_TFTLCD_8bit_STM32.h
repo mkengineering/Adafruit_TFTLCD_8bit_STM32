@@ -1,35 +1,38 @@
 // Graphics library by ladyada/adafruit with init code from Rossum
 // MIT license
+//ported to ST HAL based core by MKE
 
 #ifndef _ADAFRUIT_TFTLCD_8BIT_STM32_H_
 #define _ADAFRUIT_TFTLCD_8BIT_STM32_H_
 
 #include <Adafruit_GFX.h>
 
-#include <libmaple/gpio.h>
+//#include <libmaple/gpio.h> //used for Roger Clark / Maple core
 
 /*****************************************************************************/
 // Define pins and Output Data Registers
 /*****************************************************************************/
 // Data port
-#define TFT_DATA_PORT	GPIOB
+//For my project I used PA0-PA7 -> DB0-DB7
+#define TFT_DATA_PORT	GPIOA 
 // Data bits/pins
 #define TFT_DATA_SHIFT 0 // take the lower bits/pins 0..7
 //#define TFT_DATA_SHIFT 8 // take the higher bits/pins 8..15
 
 //Control pins |RD |WR |RS |CS |RST|
-#define TFT_CNTRL_PORT	GPIOA
-#define TFT_RD			PA0
-#define TFT_WR			PA1
-#define TFT_RS			PA2
-#define TFT_CS			PA3
+#define TFT_CNTRL_PORT	GPIOB
+#define TFT_RD			PB8
+#define TFT_WR			PB7
+#define TFT_RS			PB6
+#define TFT_CS			PB5
+//Masks - Example: PB5 -> GPIO_PIN_5
+//Note: using digitalPinToBitMask(PIN) slows display writes down substantially 
+#define TFT_RD_MASK		GPIO_PIN_8 // HAL mask for RD pin (PB8 in example)
+#define TFT_WR_MASK		GPIO_PIN_7
+#define TFT_RS_MASK		GPIO_PIN_6
+#define TFT_CS_MASK		GPIO_PIN_5
 
-#define TFT_RD_MASK		BIT0 // digitalPinToBitMask(TFT_RD) // 
-#define TFT_WR_MASK		BIT1 // digitalPinToBitMask(TFT_WR) // 
-#define TFT_RS_MASK		BIT2 // digitalPinToBitMask(TFT_RS) // 
-#define TFT_CS_MASK		BIT3 // digitalPinToBitMask(TFT_CS) // 
-
-#define TFT_RST			PB10
+#define TFT_RST			PB9 //can be any pin (doesn't need to be same port as cntrl pins)
 
 #define SLOW_WRITE 0   // set to 1 for legacy slow write (using individual digitalWrite()s
 
@@ -78,7 +81,9 @@
 	#define CS_ACTIVE_CD_COMMAND	{ CS_ACTIVE; CD_COMMAND; }
 #else
 	// use fast bit toggling, very fast speed!
-extern gpio_reg_map * cntrlRegs;
+//extern gpio_reg_map * cntrlRegs; //Libmaple method
+extern GPIO_TypeDef * cntrlRegs; //HAL method
+
 	#define WR_ACTIVE				{ cntrlRegs->BRR  = TFT_WR_MASK; }
 	#define WR_IDLE					{ cntrlRegs->BSRR = TFT_WR_MASK; }
 	#define CD_COMMAND				{ cntrlRegs->BRR  = TFT_RS_MASK; }
@@ -93,7 +98,8 @@ extern gpio_reg_map * cntrlRegs;
 extern uint8_t read8_(void);
 #define read8(x) ( x = read8_() )
 
-extern gpio_reg_map * dataRegs;
+//extern gpio_reg_map * dataRegs;
+extern GPIO_TypeDef * dataRegs;
 
 #if (TFT_DATA_SHIFT==0)
   //#warning "Using lower data nibble..."
@@ -105,14 +111,14 @@ extern gpio_reg_map * dataRegs;
     // set pins to output the 8 bit value
     #if SLOW_WRITE
      inline void write8(uint8_t c) { /*Serial.print(" write8: "); Serial.print(c,HEX); Serial.write(',');*/
-    					digitalWrite(PB0, (c&BIT0)?HIGH:LOW);
-    					digitalWrite(PB1, (c&BIT1)?HIGH:LOW);
-    					digitalWrite(PB2, (c&BIT2)?HIGH:LOW);
-    					digitalWrite(PB3, (c&BIT3)?HIGH:LOW);
-    					digitalWrite(PB4, (c&BIT4)?HIGH:LOW);
-    					digitalWrite(PB5, (c&BIT5)?HIGH:LOW);
-    					digitalWrite(PB6, (c&BIT6)?HIGH:LOW);
-    					digitalWrite(PB7, (c&BIT7)?HIGH:LOW);
+    					digitalWrite(PA0, (c&BIT0)?HIGH:LOW);
+    					digitalWrite(PA1, (c&BIT1)?HIGH:LOW);
+    					digitalWrite(PA2, (c&BIT2)?HIGH:LOW);
+    					digitalWrite(PA3, (c&BIT3)?HIGH:LOW);
+    					digitalWrite(PA4, (c&BIT4)?HIGH:LOW);
+    					digitalWrite(PA5, (c&BIT5)?HIGH:LOW);
+    					digitalWrite(PA6, (c&BIT6)?HIGH:LOW);
+    					digitalWrite(PA7, (c&BIT7)?HIGH:LOW);
     					WR_STROBE; }
     #else
       #define write8(c) { dataRegs->BSRR = (uint32_t)(0x00FF0000 + ((c)&0xFF)); WR_STROBE; }
@@ -128,14 +134,14 @@ extern gpio_reg_map * dataRegs;
     // set pins to output the 8 bit value
     #if SLOW_WRITE
      inline void write8(uint8_t c) { /*Serial.print(" write8: "); Serial.print(c,HEX); Serial.write(',');*/
-    					digitalWrite(PB8, (c&BIT0)?HIGH:LOW);
-    					digitalWrite(PB9, (c&BIT1)?HIGH:LOW);
-    					digitalWrite(PB10, (c&BIT2)?HIGH:LOW);
-    					digitalWrite(PB11, (c&BIT3)?HIGH:LOW);
-    					digitalWrite(PB12, (c&BIT4)?HIGH:LOW);
-    					digitalWrite(PB13, (c&BIT5)?HIGH:LOW);
-    					digitalWrite(PB14, (c&BIT6)?HIGH:LOW);
-    					digitalWrite(PB15, (c&BIT7)?HIGH:LOW);
+    					digitalWrite(PA8, (c&BIT0)?HIGH:LOW);
+    					digitalWrite(PA9, (c&BIT1)?HIGH:LOW);
+    					digitalWrite(PA10, (c&BIT2)?HIGH:LOW);
+    					digitalWrite(PA11, (c&BIT3)?HIGH:LOW);
+    					digitalWrite(PA12, (c&BIT4)?HIGH:LOW);
+    					digitalWrite(PA13, (c&BIT5)?HIGH:LOW);
+    					digitalWrite(PA14, (c&BIT6)?HIGH:LOW);
+    					digitalWrite(PA15, (c&BIT7)?HIGH:LOW);
     					WR_STROBE; }
     #else
       #define write8(c) {  dataRegs->BSRR = (uint32_t)(0xFF000000 + (((c)&0xFF)<<TFT_DATA_SHIFT)); WR_STROBE; }
