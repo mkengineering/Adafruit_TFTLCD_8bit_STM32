@@ -1,5 +1,6 @@
 // Graphics library by ladyada/adafruit with init code from Rossum
 // MIT license
+//ported to ST HAL based core by MKE
 
 #include "Adafruit_TFTLCD_8bit_STM32.h"
 
@@ -8,8 +9,11 @@
 #include "hx8347g.h"
 #include "hx8357x.h"
 
-gpio_reg_map * cntrlRegs;
-gpio_reg_map * dataRegs;
+//gpio_reg_map * cntrlRegs;
+//gpio_reg_map * dataRegs;
+
+GPIO_TypeDef * cntrlRegs; //HAL method
+GPIO_TypeDef * dataRegs;
 
 /*****************************************************************************/
 // Constructor
@@ -58,8 +62,12 @@ void Adafruit_TFTLCD_8bit_STM32::begin(uint16_t id)
 /*****************************************************************************/
 void Adafruit_TFTLCD_8bit_STM32::reset(void)
 {
-	cntrlRegs = TFT_CNTRL_PORT->regs;
-	dataRegs = TFT_DATA_PORT->regs;
+	//cntrlRegs = TFT_CNTRL_PORT->regs;
+	//dataRegs = TFT_DATA_PORT->regs;
+	
+	cntrlRegs = TFT_CNTRL_PORT; //HAL method
+	dataRegs = TFT_DATA_PORT;
+	
 	//Set control lines as output
 	//cntrlRegs->CRL = (cntrlRegs->CRL & 0xFFFF0000) | 0x00003333;
 	pinMode(TFT_RD, OUTPUT);
