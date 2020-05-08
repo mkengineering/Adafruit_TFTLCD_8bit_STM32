@@ -9,7 +9,7 @@
 #include "hx8347g.h"
 #include "hx8357x.h"
 
-//gpio_reg_map * cntrlRegs;
+//gpio_reg_map * cntrlRegs; //Maple method
 //gpio_reg_map * dataRegs;
 
 GPIO_TypeDef * cntrlRegs; //HAL method
