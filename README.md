@@ -1,4 +1,4 @@
-This is a library for the 8 bit parallel driven TFT displays, ported from stevstrong's port of the original Adafruit library [https://github.com/adafruit/TFTLCD-Library] and adapted to STM32F103Cx controller. No other CPU architecture is supportted at the moment.
+This is a library for the 8 bit parallel driven TFT displays, ported from stevstrong's port of the original Adafruit library [https://github.com/adafruit/TFTLCD-Library] and adapted to STM32F103Cx controller. No other CPU architecture is supported at the moment.
 
 This library depends on the ST HAL based core files from:
 
@@ -13,18 +13,18 @@ Benchmark Using Adafruit 3.2" ILI9341 based TFT and STM32 Blue Pill @ 72 MHz:
 
 | Benchmark | Time (microseconds) |
 | --- | --- |
-| `Screen fill` | 64319 |
-| `Text` | 21731 |
-| `Lines` | 183174 |
-| `Horiz/Vert Lines` | 7620 |
-| `Rectangles (outline)` | 6035 |
-| `Rectangles (filled)` | 149662 |
-| `Circles (filled)` | 70666 |
-| `Circles (outline)` | 79573 |
-| `Triangles (outline)` | 39746 |
-| `Triangles (filled)` | 91286 |
-| `Rounded rects (outline)` | 28431 |
-| `Rounded rects (filled)` | 166652 |
+| `Screen fill` | 65189 |
+| `Text` | 20945 |
+| `Lines` | 176017 |
+| `Horiz/Vert Lines` | 7769 |
+| `Rectangles (outline)` | 6087 |
+| `Rectangles (filled)` | 151762 |
+| `Circles (filled)` | 69631 |
+| `Circles (outline)` | 75129 |
+| `Triangles (outline)` | 38230 |
+| `Triangles (filled)` | 91974 |
+| `Rounded rects (outline)` | 27250 |
+| `Rounded rects (filled)` | 168812 |
 
 How to use:
 - Place the Adafruit_TFT library folder your <arduinosketchfolder>/libraries/ folder. You may need to create the libraries subfolder if its your first library. Restart the IDE.
