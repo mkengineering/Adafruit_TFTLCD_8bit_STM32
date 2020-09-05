@@ -1,6 +1,6 @@
 // Graphics library by ladyada/adafruit with init code from Rossum
 // MIT license
-//ported to ST HAL based core by MKE
+// ported to STM32duino ST Core by MKE
 
 #include "Adafruit_TFTLCD_8bit_STM32.h"
 
@@ -8,12 +8,6 @@
 #include "ili9341.h"
 #include "hx8347g.h"
 #include "hx8357x.h"
-
-//gpio_reg_map * cntrlRegs; //Maple method
-//gpio_reg_map * dataRegs;
-
-GPIO_TypeDef * cntrlRegs; //HAL method
-GPIO_TypeDef * dataRegs;
 
 /*****************************************************************************/
 // Constructor
@@ -28,15 +22,6 @@ void Adafruit_TFTLCD_8bit_STM32::begin(uint16_t id)
 {
 	reset();
 
-/*	// test routine for the port pins:
-	Serial.print("CR: "); Serial.println(dataRegs->CRL, HEX);
-	Serial.println("testing TFT data pins...");
-	uint8_t c = 0;
-	while(1) {
-		write8(c);
-		c++;
-	}
-*/
 	if ((id == 0x9325) || (id == 0x9328)) {
 		driver = ID_932X;
 		ili932x_begin();
@@ -62,47 +47,13 @@ void Adafruit_TFTLCD_8bit_STM32::begin(uint16_t id)
 /*****************************************************************************/
 void Adafruit_TFTLCD_8bit_STM32::reset(void)
 {
-	//cntrlRegs = TFT_CNTRL_PORT->regs;
-	//dataRegs = TFT_DATA_PORT->regs;
-	
-	cntrlRegs = TFT_CNTRL_PORT; //HAL method
-	dataRegs = TFT_DATA_PORT;
-	
-	//Set control lines as output
-	//cntrlRegs->CRL = (cntrlRegs->CRL & 0xFFFF0000) | 0x00003333;
-	pinMode(TFT_RD, OUTPUT);
-	pinMode(TFT_WR, OUTPUT);
-	pinMode(TFT_RS, OUTPUT);
-	pinMode(TFT_CS, OUTPUT);
+	setCntrlDir();
 	CS_IDLE; // Set all control bits to HIGH (idle)
 	CD_DATA; // Signals are ACTIVE LOW
 	WR_IDLE;
 	RD_IDLE;
-/* testing PB4 - sometimes reserved by debug port, see http://www.stm32duino.com/viewtopic.php?f=35&t=1130&p=24289#p24289
-	pinMode(PB4, OUTPUT);
-	digitalWrite(PB4, HIGH);
-	while (1) {
-		CS_ACTIVE;
-		//WR_STROBE;
-		digitalWrite(PB4, LOW);
-		digitalWrite(PB4, HIGH);
-		CS_IDLE;
-		delay(1000);
-	}
-*/
-	//set up 8 bit parallel port to write mode.
 	setWriteDir();
-
-	// toggle RST low to reset
-	if (TFT_RST > 0) {
-		pinMode(TFT_RST, OUTPUT);
-		digitalWrite(TFT_RST, HIGH);
-		delay(100);
-		digitalWrite(TFT_RST, LOW);
-		delay(100);
-		digitalWrite(TFT_RST, HIGH);
-		delay(100);
-	}
+	RST_TOGGLE;
 }
 
 /*****************************************************************************/
@@ -233,7 +184,7 @@ void Adafruit_TFTLCD_8bit_STM32::drawFastVLine(int16_t x, int16_t y, int16_t len
 /*****************************************************************************/
 void Adafruit_TFTLCD_8bit_STM32::fillRect(int16_t x1, int16_t y1, int16_t w, int16_t h, uint16_t fillcolor)
 {
-	//Serial.println("\n::fillRect...");
+
   int16_t  x2, y2;
 
   // Initial off-screen clipping
@@ -467,7 +418,7 @@ uint8_t read8_(void)
 {
   RD_ACTIVE;
   delayMicroseconds(10);
-  uint8_t temp = ( (dataRegs->IDR>>TFT_DATA_SHIFT) & 0x00FF);
+  uint8_t temp = (TFT_DATA_PORT->IDR & 0x00FF);
   delayMicroseconds(10);
   RD_IDLE;
   delayMicroseconds(10);
@@ -519,25 +470,11 @@ uint16_t Adafruit_TFTLCD_8bit_STM32::readPixel(int16_t x, int16_t y)
 /*****************************************************************************/
 uint16_t Adafruit_TFTLCD_8bit_STM32::readID(void)
 {
-  /*
-  for (uint8_t i=0; i<128; i++) {
-    Serial.print("$"); Serial.print(i, HEX);
-    Serial.print(" = 0x"); Serial.println(readReg(i), HEX);
-  }
-  */
-    /*
-      Serial.println("!");
-      for (uint8_t i=0; i<4; i++) {
-        Serial.print("$"); Serial.print(i, HEX);
-        Serial.print(" = 0x"); Serial.println(readReg(i), HEX);
-      }
-    */
-/**/
   if (readReg32(0x04) == 0x8000) { // eh close enough
     // setc!
     writeRegister24(HX8357D_SETC, 0xFF8357);
     delay(300);
-    //Serial.println(readReg(0xD0), HEX);
+	
     if (readReg32(0xD0) == 0x990000) {
       return 0x8357;
     }
@@ -547,7 +484,7 @@ uint16_t Adafruit_TFTLCD_8bit_STM32::readID(void)
   if (id != 0x9341 && id != 0x9338) {
     id = readReg(0);
   }
-	//Serial.print("ID: "); Serial.println(id,HEX);
+
   return id;
 }
 
@@ -595,8 +532,6 @@ uint16_t readReg(uint8_t r)
   CS_IDLE;
   setWriteDir();  // Restore LCD data port(s) to WRITE configuration
 
-  //Serial.print("Read $"); Serial.print(r, HEX); 
-  //Serial.print(":\t0x"); Serial.println(id, HEX);
   return id;
 }
 
@@ -648,17 +583,4 @@ void writeRegister32(uint16_t r, uint32_t d)
   write8(d);
   CS_IDLE;
 }
-
-/****************************************************************************
-void writeRegister32(uint16_t r, uint16_t d1, uint16_t d2)
-{
-  writeCommand(r);
-  CD_DATA;
-  write8(d1 >> 8);
-  write8(d1);
-  write8(d2 >> 8);
-  write8(d2);
-  CS_IDLE;
-}
-*/
 //Adafruit_TFTLCD_8bit_STM32 tft;
